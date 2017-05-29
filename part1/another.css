@@ -1,0 +1,22 @@
+svg {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crishpEdges;
+}
+
+.tooltip {
+    font-size: 20px;
+    font-weight: bold;
+    color: red;
+    position: absolute;
+    width: 200px;
+    height: 28px;
+    pointer-events: none;
+  }

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <style>
+  body {
+    font: 11px sans-serif;
+  }
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+  .dot {
+    stroke: #000;
+  }
+  .tooltip {
+    font-size: 20px;
+    font-weight: bold;
+    color: red;
+    position: absolute;
+    width: 200px;
+    height: 28px;
+    pointer-events: none;
+  }
+
+  h1{
+    color: blue;
+  }  
+  </style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<h1 align="middle">Grades vs. Income in Different Districts</h1>
+
+<script>
+  // loading the data (csv file)
+    d3.csv("data-scatter.csv", function(error, data) {
+      if(error) console.log("Error, no data");
+      // change string (from CSV) into number format
+      data.forEach(function(d) {
+        d.income = +d.income;
+        d["grades"] = +d["grades"];
+      });
+      xscale.domain([d3.min(data, xvalue)-1, d3.max(data, xvalue)+1]);
+      yscale.domain([d3.min(data, yvalue)-1, d3.max(data, yvalue)+1]);
+      // inserting dots into the svg
+      svg.selectAll(".dot")
+          // get the data
+          .data(data)
+        // using circle figure
+        .enter().append("circle")
+          .attr("class", "dot")
+          // set radius to 8 
+          .attr("r", 8)
+          .attr("cx", xmap)
+          .attr("cy", ymap)
+          .on("mouseover", function(d) {
+              tooltip.html("District Name: " + d["district"] + "<br/>"+
+               "Income: $" + xvalue(d)  + "<br/>"+
+               "Grade: " + yvalue(d) + "GPA" + "<br />")
+                  .style("left", (50) + "px")
+                  .style("top", (50) + "px");
+          })
+          
+      // x-axis
+      svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xaxis)
+        .append("text")
+          .attr("class", "label")
+          .attr("x", width)
+          .attr("y", -6)
+          .style("text-anchor", "end")
+          .text("income");
+
+      // y-axis
+      svg.append("g")
+          .attr("class", "y axis")
+          .call(yaxis)
+        .append("text")
+          .attr("class", "label")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 6)
+          .attr("dy", ".71em")
+          .style("text-anchor", "end")
+          .text("Grades");
+
+      
+    });
+
+    //setting the margin of the svg
+    var margin = {top: 20, right: 20, bottom: 20, left: 20},
+        //setting the width and height so it fills up the screen
+        width = 2000 - margin.left - margin.right,
+        height = 950 - margin.top - margin.bottom;
+
+    // setting up the xvalue
+    var xvalue = function(d) { return d.income;},
+        // setting up the xscale
+        xscale = d3.scale.linear().range([0, width]),
+        //  setting up xmap
+        xmap = function(d) { return xscale(xvalue(d));}, 
+        // setting up xaxis
+        xaxis = d3.svg.axis().scale(xscale).orient("bottom");
+
+    // setup y value
+    var yvalue = function(d) { return d["grades"];}, 
+        // setting up yscale
+        yscale = d3.scale.linear().range([height, 0]), 
+        // setting up ymap
+        ymap = function(d) { return yscale(yvalue(d));}, 
+        // setting up yaxis
+        yaxis = d3.svg.axis().scale(yscale).orient("left");
+
+    // add the graph canvas to the body of the webpage
+    var svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // add the tooltip area to the webpage
+    var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip");
+
+    
+</script>
+<p><strong>Created by HeeSeung Park</strong></p>
+</body>
+</html>

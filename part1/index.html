@@ -1,0 +1,142 @@
+<html lang="en">
+<head>
+  <head>
+    <title>CSc59969 Data Visualization Homework 3 Part 1</title>
+    <link rel="stylesheet" href="another.css">
+  </head>
+  <body>
+    <!--The script for jQuery-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <!--The script for D3-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+      <h1 align="center">GDP of the United States of America</div>
+      <svg class="chart"></svg>
+      <p><strong>Created By HeeSeung Park</strong></p>
+  </body>
+</html>
+
+<script>
+    $('document').ready(function() {
+            // top bottom left right
+        var margin = {top:20, right:0, bottom: 100, left: 100},
+            // specifying the width of the graph
+            width = 1500,
+            // specifying the height of the graph
+            height = 1000 - margin.top - margin.bottom;
+        
+        // we need to define svg
+        var svg = d3.select('.chart')
+            // .append('svg')
+            // height and weight of svg
+            .attr ({
+                "width": width + margin.right + margin.left,
+                "height": height + margin.top + margin.bottom
+            })
+            .append('g')
+                .attr("transform", "translate(" + margin.left + ',' + margin.right + ")");
+
+        // we need to define x and y scales
+        
+
+        var xscale = d3.scale.ordinal()
+            .rangeRoundBands([0,width], 0.2, 0.2);
+        var yscale = d3.scale.linear()
+            .range([height, 0]);
+        
+        var xAxis = d3.svg.axis()
+            .scale(xscale)
+            .orient("bottom");
+        var yAxis = d3.svg.axis()
+            .scale(yscale)
+            .orient("left");
+
+        var tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip");
+
+        // import data
+        d3.csv("result.csv", function(error, data) {
+            // check for error
+            if(error) console.log("Error, no data");
+            
+            data.forEach(function(d) {
+                d.gdp =  +d.gdp;
+                d.date = d.date;
+            });
+
+            data.sort(function(a,b) {
+                return b.gdp - a.gdp;
+            });
+
+            // domain x and y axis
+            xscale.domain(data.map(function(d) {
+                return d.date;
+            }));
+            yscale.domain([0, d3.max(data, function(d) {
+                return d.gdp;
+            })]);
+
+            // draw the bars
+            svg.selectAll('rect')
+                .data(data)
+                .enter()
+                .append('rect')
+                .attr("height", 0)
+                .attr("y", height)
+                .attr({
+                    'x': function(d) { return xscale(d.date); },
+                    'y': function(d) { return yscale(d.gdp); },
+                    'width': xscale.rangeBand(),
+                    "height": function(d) {
+                        return height - yscale(d.gdp); 
+                    }
+                })
+                .style("fill",function(d,i) {return 'rgb(95,158,160)';})
+                .on("mouseover", function(d) {
+                    tooltip.html( "Date: " + d.date + "<br/>" +
+                                     "GDP: " + d.gdp + "<br/ >")
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY) + "px");
+                }); 
+            
+            // label the bars
+            svg.selectAll('text')
+                .data(data)
+                .enter()
+                .append('text')
+                .text(function(d) {
+                    return d.gdp;
+                })
+                // .attr('x', function(d) {
+                //     return xscale(d.date) + xscale.rangeBand()/2;
+                // })
+                // .attr('y', function(d) {
+                //     return yscale(d.gdp) + 12;
+                // })
+                .style("fill", "white")
+                .style("text-anchor", "middle");
+
+            // draw the x axis and y axis
+            svg.append("g")
+                .attr("class","x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis)
+                .selectAll('text')
+                .attr("transform", "rotate(-60)")
+                .style("text-anchor", "end")
+                .style("font-size", "12px");
+                
+            
+            svg.append("g")
+                .attr("class","y axis")
+                .call(yAxis)
+                .style("font-size", "12px");
+
+
+        });
+    })
+    
+
+    
+
+
+</script>
